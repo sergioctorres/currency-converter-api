@@ -1,0 +1,25 @@
+﻿using Application.Dtos.Auth;
+using Application.Interfaces;
+using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace WebApi.Controllers.Auth;
+
+[ApiVersion("1.0")]
+[Route("v{version:apiVersion}/[controller]")]
+public class AuthController(IAuthService authService, ITokenProvider tokenProvider) : ApiControllerBase
+{
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+    {
+        var loginResult = await authService.ValidateCredentialsAsync(request, cancellationToken);
+
+        if (loginResult.IsAuthenticated is false) return Unauthorized();
+
+        var tokenRequest = new TokenRequest(loginResult.UserId.ToString(), loginResult.Username);
+
+        return Ok(await tokenProvider.GenerateTokenAsync(tokenRequest, cancellationToken));
+    }
+}

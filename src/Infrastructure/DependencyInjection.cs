@@ -1,19 +1,23 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Interfaces;
 using Infrastructure.Security.Configurations;
 using Infrastructure.Security.Providers;
+using Infrastructure.Security.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Infrastructure.Security;
+namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static void RegisterSecurity(this IServiceCollection services, IConfiguration configuration)
+    public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var tokenConfiguration = configuration.GetRequiredSection(nameof(TokenConfiguration)).Get<TokenConfiguration>()!;
+        #region Authentication and Authorization
+
+        var tokenConfiguration = configuration.GetSection("TokenConfiguration").Get<TokenConfiguration>()!;
+
         services.AddSingleton(tokenConfiguration);
         services.AddSingleton<ITokenProvider, TokenProvider>();
 
@@ -27,10 +31,20 @@ public static class DependencyInjection
                     ValidateIssuer = true,
                     ValidIssuer = tokenConfiguration.Issuer,
                     ValidateAudience = true,
-                    ValidAudience = tokenConfiguration.Audience
+                    ValidAudience = tokenConfiguration.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
         services.AddAuthorization();
+
+        #endregion
+
+        #region Services
+
+        services.AddScoped<IAuthService, AuthService>();
+
+        #endregion
     }
 }

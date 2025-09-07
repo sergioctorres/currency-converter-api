@@ -13,6 +13,8 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/WebApi/WebApi.csproj", "src/WebApi/"]
+COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
+COPY ["src/Application/Application.csproj", "src/Application/"]
 RUN dotnet restore "./src/WebApi/WebApi.csproj"
 COPY . .
 WORKDIR "/src/src/WebApi"

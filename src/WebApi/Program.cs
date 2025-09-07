@@ -1,24 +1,13 @@
-using Asp.Versioning;
-using Infrastructure.Security;
-using WebApi.Configuration;
+using Infrastructure;
+using WebApi.Configuration.ApiVersioning;
+using WebApi.Configuration.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 
-builder.Services.AddApiVersioning(options =>
-    {
-        options.DefaultApiVersion = new ApiVersion(1, 0);
-        options.AssumeDefaultVersionWhenUnspecified = true;
-        options.ReportApiVersions = true;
-    })
-    .AddApiExplorer(options =>
-    {
-        options.GroupNameFormat = "'v'VVV";
-        options.SubstituteApiVersionInUrl = true;
-    });
-
-builder.Services.RegisterSecurity(configuration);
+builder.Services.AddInfrastructure(configuration);
+builder.Services.AddApiVersioningConfiguration();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -34,8 +23,10 @@ app.UseSwaggerUI(options =>
             options.SwaggerEndpoint($"/swagger/{apiVersionDescription.GroupName}/swagger.json", apiVersionDescription.GroupName.ToUpperInvariant());
 
     });
-app.MapControllers();
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();

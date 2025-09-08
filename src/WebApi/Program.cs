@@ -1,17 +1,21 @@
 using Infrastructure;
+using WebApi.Configuration;
 using WebApi.Configuration.ApiVersioning;
+using WebApi.Configuration.Observability;
 using WebApi.Configuration.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 
+builder.Services.AddAppOptions(configuration);
 builder.Services.AddInfrastructure(configuration);
 builder.Services.AddApiVersioningConfiguration();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
+builder.Services.AddObservability(configuration);
 
 var app = builder.Build();
 
@@ -28,6 +32,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseObservability();
 
 app.Run();
 

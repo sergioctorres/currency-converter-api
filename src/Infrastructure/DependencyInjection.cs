@@ -17,7 +17,6 @@ public static class DependencyInjection
     {
         #region Authentication and Authorization
 
-        services.Configure<TokenConfiguration>(configuration.GetSection("TokenConfiguration"));
         services.AddSingleton<ITokenProvider, TokenProvider>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

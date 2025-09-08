@@ -5,6 +5,7 @@ using Infrastructure.Security.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -16,26 +17,28 @@ public static class DependencyInjection
     {
         #region Authentication and Authorization
 
-        var tokenConfiguration = configuration.GetSection("TokenConfiguration").Get<TokenConfiguration>()!;
-
-        services.AddSingleton(tokenConfiguration);
+        services.Configure<TokenConfiguration>(configuration.GetSection("TokenConfiguration"));
         services.AddSingleton<ITokenProvider, TokenProvider>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(o =>
+            .AddJwtBearer();
+
+        services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, o =>
+        {
+            var tokenConfiguration = services.BuildServiceProvider().GetRequiredService<IOptions<TokenConfiguration>>().Value;
+
+            o.TokenValidationParameters = new TokenValidationParameters
             {
-                o.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfiguration.SecretKey)),
-                    ValidateIssuer = true,
-                    ValidIssuer = tokenConfiguration.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = tokenConfiguration.Audience,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfiguration.SecretKey)),
+                ValidateIssuer = true,
+                ValidIssuer = tokenConfiguration.Issuer,
+                ValidateAudience = true,
+                ValidAudience = tokenConfiguration.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
 
         services.AddAuthorization();
 

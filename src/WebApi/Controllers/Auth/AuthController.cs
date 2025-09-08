@@ -12,6 +12,8 @@ public class AuthController(IAuthService authService, ITokenProvider tokenProvid
 {
     [HttpPost]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(TokenResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var loginResult = await authService.ValidateCredentialsAsync(request, cancellationToken);

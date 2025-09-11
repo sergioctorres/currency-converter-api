@@ -14,7 +14,7 @@ public sealed class TokenProvider(IOptions<TokenConfiguration> options) : IToken
 {
     private readonly TokenConfiguration _tokenConfiguration = options.Value;
 
-    public Task<TokenResult> GenerateTokenAsync(TokenRequest tokenRequest, CancellationToken cancellationToken)
+    public Task<TokenResult> GenerateTokenAsync(TokenRequest tokenRequest, CancellationToken cancellationToken = default)
     {
         var expiresAtUtc = DateTime.UtcNow.AddMinutes(_tokenConfiguration.ExpirationInMinutes);
             

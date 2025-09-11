@@ -20,7 +20,7 @@ public class AuthController(IAuthService authService, ITokenProvider tokenProvid
 
         if (loginResult.IsAuthenticated is false) return Unauthorized();
 
-        var tokenRequest = new TokenRequest(loginResult.UserId.ToString(), loginResult.Username);
+        var tokenRequest = new TokenRequest(loginResult.UserId.ToString(), loginResult.Username, loginResult.Roles);
 
         return Ok(await tokenProvider.GenerateTokenAsync(tokenRequest, cancellationToken));
     }

@@ -1,7 +1,9 @@
-﻿using Application.Dtos.Common;
+﻿using Application.Constants;
+using Application.Dtos.Common;
 using Application.Dtos.CurrencyRate;
 using Application.Interfaces;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers.v1;
@@ -31,6 +33,7 @@ public class CurrencyRatesController(ICurrencyRateProvider currencyProvider) : A
 
     [HttpGet]
     [Route("history")]
+    [Authorize(PolicyConstants.RequireAdmin)]
     [ProducesResponseType(typeof(PagedResult<HistoricalResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

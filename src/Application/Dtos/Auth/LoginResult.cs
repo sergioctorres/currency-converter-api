@@ -3,6 +3,7 @@
 public record LoginResult(
     bool IsAuthenticated,
     Guid UserId = default,
-    string Username = ""
+    string Username = "",
+    string[]? Roles = default
 );
 

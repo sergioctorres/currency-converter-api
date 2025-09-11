@@ -27,6 +27,12 @@ public sealed class TokenProvider(IOptions<TokenConfiguration> options) : IToken
             new(ClaimTypes.Name, tokenRequest.Name)
         };
 
+        if (tokenRequest.Roles?.Any() ?? false)
+        {
+            foreach (var role in tokenRequest.Roles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
         var securityToken = new JwtSecurityToken(
             issuer: _tokenConfiguration.Issuer,
             audience: _tokenConfiguration.Audience,

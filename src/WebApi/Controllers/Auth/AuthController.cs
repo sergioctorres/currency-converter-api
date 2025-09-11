@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers.Auth;
 
-[ApiVersion("1.0")]
-[Route("v{version:apiVersion}/[controller]")]
+[Route("[controller]")]
+[ApiVersionNeutral]
 public class AuthController(IAuthService authService, ITokenProvider tokenProvider) : ApiControllerBase
 {
     [HttpPost]

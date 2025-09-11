@@ -14,7 +14,7 @@ public sealed class AuthService : IAuthService
         _users["user@email.com"] = (Guid.NewGuid(), "123456", new[] { "User" });
     }
 
-    public Task<LoginResult> ValidateCredentialsAsync(LoginRequest loginRequest, CancellationToken cancellationToken)
+    public Task<LoginResult> ValidateCredentialsAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
     {
         if (_users.TryGetValue(loginRequest.UserName, out var user) && loginRequest.Password == user.Password)
             return Task.FromResult(new LoginResult(true, user.Id, loginRequest.UserName));

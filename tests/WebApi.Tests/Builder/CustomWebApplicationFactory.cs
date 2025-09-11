@@ -22,10 +22,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             services.AddSingleton(new CurrencyProviderConfiguration
             {
+                Name = "Frankfurter API",
                 Url = "https://api.frankfurter.app",
                 HealthCheck = new HealthCheckSettings
                 {
-                    Name = "Frankfurter API",
                     Path = "latest"
                 }
             });

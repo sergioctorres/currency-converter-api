@@ -1,4 +1,7 @@
 ﻿using Application.Interfaces;
+using Infrastructure.Currency.DependencyInjection;
+using Infrastructure.Currency.Providers;
+using Infrastructure.Currency.Services;
 using Infrastructure.Security.Configurations;
 using Infrastructure.Security.Providers;
 using Infrastructure.Security.Services;
@@ -46,6 +49,9 @@ public static class DependencyInjection
         #region Services
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICurrencyRateProvider, CurrencyService>();
+        services.AddScoped<FrankfurterCurrencyProvider>();
+        services.AddScoped<ICurrencyRateProviderFactory, CurrencyRateProviderFactory>();
 
         #endregion
     }

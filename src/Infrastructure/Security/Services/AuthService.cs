@@ -1,4 +1,5 @@
-﻿using Application.Dtos.Auth;
+﻿using Application.Constants;
+using Application.Dtos.Auth;
 using Application.Interfaces;
 using System.Collections.Concurrent;
 
@@ -10,14 +11,14 @@ public sealed class AuthService : IAuthService
 
     public AuthService()
     {
-        _users["admin@email.com"] = (Guid.NewGuid(), "123456", new[] { "Admin", "User" });
-        _users["user@email.com"] = (Guid.NewGuid(), "123456", new[] { "User" });
+        _users["admin@email.com"] = (Guid.NewGuid(), "123456", [RoleConstants.Admin, RoleConstants.User]);
+        _users["user@email.com"] = (Guid.NewGuid(), "123456", [RoleConstants.User]);
     }
 
     public Task<LoginResult> ValidateCredentialsAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default)
     {
         if (_users.TryGetValue(loginRequest.UserName, out var user) && loginRequest.Password == user.Password)
-            return Task.FromResult(new LoginResult(true, user.Id, loginRequest.UserName));
+            return Task.FromResult(new LoginResult(true, user.Id, loginRequest.UserName, user.Roles));
 
         return Task.FromResult(new LoginResult(false));
     }

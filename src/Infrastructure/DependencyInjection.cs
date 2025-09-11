@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Constants;
+using Application.Interfaces;
 using Infrastructure.Currency.DependencyInjection;
 using Infrastructure.Currency.Providers;
 using Infrastructure.Currency.Services;
@@ -43,6 +44,9 @@ public static class DependencyInjection
         });
 
         services.AddAuthorization();
+        services.AddAuthorizationBuilder()
+            .AddPolicy(PolicyConstants.RequireUser, policy => policy.RequireRole(RoleConstants.User))
+            .AddPolicy(PolicyConstants.RequireAdmin, policy => policy.RequireRole(RoleConstants.Admin));
 
         #endregion
 

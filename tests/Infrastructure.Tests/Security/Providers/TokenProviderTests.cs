@@ -30,7 +30,7 @@ public class TokenProviderTests
     public async Task GenerateTokenAsync_ShouldReturn_ValidToken()
     {
         // Arrange
-        var request = new TokenRequest("sub", "name");
+        var request = new TokenRequest("sub", "name", ["Role"]);
         var expectedExpiresAtUtc = DateTime.UtcNow.AddMinutes(_config.ExpirationInMinutes);
 
         // Act

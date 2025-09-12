@@ -7,12 +7,20 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Currency.Services;
 
-public class CurrencyService(ICurrencyRateProviderFactory factory, IOptions<CurrencyProviderConfiguration> options) : ICurrencyRateProvider
+public class CurrencyService(
+    ICurrencyRateProviderFactory factory,
+    IOptions<CurrencyProviderConfiguration> options,
+    ICacheService cacheService
+) : ICurrencyRateProvider
 {
     private readonly ICurrencyRateProvider _currencyProvider = factory.Create(options.Value.Name);
 
     public async Task<LatestResult?> GetLatestCurrencyRatesAsync(LatestRequest request, CancellationToken cancellationToken = default)
     {
+        var cached = await cacheService.TryGetAsync<LatestResult>(CacheKeys.CurrencyService.Latest(request), cancellationToken);
+
+        if (cached is not null) return cached;
+
         var response = await _currencyProvider.GetLatestCurrencyRatesAsync(request, cancellationToken);
 
         if (response is null) return null;
@@ -21,7 +29,11 @@ public class CurrencyService(ICurrencyRateProviderFactory factory, IOptions<Curr
             .Where(r => CurrencyRateRulesConstants.BlockedCurrencies.Contains(r.Key) is false)
             .ToDictionary(r => r.Key, r => r.Value);
 
-        return response with { Rates = filteredRates };
+        var finalResponse = response with { Rates = filteredRates };
+
+        await cacheService.SetAsync(CacheKeys.CurrencyService.Latest(request), finalResponse, ICacheService.ShortCache, cancellationToken);
+
+        return finalResponse;
     }
 
     public Task<ConvertResult?> ConvertCurrencyRatesAsync(ConvertRequest request, CancellationToken cancellationToken = default) =>
@@ -29,6 +41,10 @@ public class CurrencyService(ICurrencyRateProviderFactory factory, IOptions<Curr
 
     public async Task<PagedResult<HistoricalResult>?> GetHistoricalCurrencyRatesAsync(HistoricalRequest request, CancellationToken cancellationToken = default)
     {
+        var cached = await cacheService.TryGetAsync<PagedResult<HistoricalResult>>(CacheKeys.CurrencyService.Historical(request), cancellationToken);
+
+        if (cached is not null) return cached;
+
         var response = await _currencyProvider.GetHistoricalCurrencyRatesAsync(request, cancellationToken);
 
         if (response is null) return null;
@@ -42,6 +58,10 @@ public class CurrencyService(ICurrencyRateProviderFactory factory, IOptions<Curr
             ))
             .ToList();
 
-        return new PagedResult<HistoricalResult>(filteredRecords!, response.TotalRecords);
+        var finalResponse = new PagedResult<HistoricalResult>(filteredRecords!, response.TotalRecords);
+
+        await cacheService.SetAsync(CacheKeys.CurrencyService.Historical(request), finalResponse, ICacheService.LongCache, cancellationToken);
+
+        return finalResponse;
     }
 }

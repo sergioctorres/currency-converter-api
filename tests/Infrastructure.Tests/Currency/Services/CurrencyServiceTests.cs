@@ -13,6 +13,7 @@ public class CurrencyServiceTests
 {
     private readonly Mock<ICurrencyRateProvider> _providerMock = new();
     private readonly CurrencyService _service;
+    private readonly Mock<ICacheService> _cacheServiceMock = new();
 
     public CurrencyServiceTests()
     {
@@ -20,7 +21,7 @@ public class CurrencyServiceTests
         var config = Options.Create(new CurrencyProviderConfiguration { Name = CurrencyRateConstants.Providers.FrankfurterApi });
 
         factoryMock.Setup(f => f.Create(config.Value.Name)).Returns(_providerMock.Object);
-        _service = new CurrencyService(factoryMock.Object, config);
+        _service = new CurrencyService(factoryMock.Object, config, _cacheServiceMock.Object);
     }
 
     [Fact]
@@ -38,7 +39,7 @@ public class CurrencyServiceTests
             });
 
         _providerMock.Setup(p => p.GetLatestCurrencyRatesAsync(request, It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(original);
+            .ReturnsAsync(original);
 
         // Act
         var result = await _service.GetLatestCurrencyRatesAsync(request);
@@ -54,7 +55,7 @@ public class CurrencyServiceTests
     public async Task GetHistoricalCurrencyRatesAsync_RemovesBlockedCurrencies()
     {
         // Arrange
-        var request = new HistoricalRequest(DateTime.UtcNow.AddDays(-2)) { EndDate = DateTime.UtcNow };
+        var request = new HistoricalRequest(DateTime.UtcNow.AddDays(-2), "BRL") { EndDate = DateTime.UtcNow };
 
         var records = new List<HistoricalResult>
         {
@@ -69,7 +70,7 @@ public class CurrencyServiceTests
         var paged = new PagedResult<HistoricalResult>(records, records.Count);
 
         _providerMock.Setup(p => p.GetHistoricalCurrencyRatesAsync(request, It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(paged);
+            .ReturnsAsync(paged);
 
         // Act
         var result = await _service.GetHistoricalCurrencyRatesAsync(request);
@@ -89,7 +90,7 @@ public class CurrencyServiceTests
         var expected = new ConvertResult("USD", "EUR", 100, 85, 0.85, DateTime.UtcNow);
 
         _providerMock.Setup(p => p.ConvertCurrencyRatesAsync(request, It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(expected);
+            .ReturnsAsync(expected);
 
         // Act
         var result = await _service.ConvertCurrencyRatesAsync(request);
@@ -97,5 +98,48 @@ public class CurrencyServiceTests
         // Assert
         Assert.Equal(expected.Result, result!.Result);
         _providerMock.Verify(p => p.ConvertCurrencyRatesAsync(request, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetLatestCurrencyRatesAsync_WhenCacheExists_ReturnsCachedResult()
+    {
+        // Arrange
+        var request = new LatestRequest("USD", ["EUR"]);
+        var cachedResult = new LatestResult("USD", DateTime.UtcNow, new Dictionary<string, double> { { "EUR", 0.85 } });
+
+        _cacheServiceMock.Setup(c => c.TryGetAsync<LatestResult>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cachedResult);
+
+        // Act
+        var result = await _service.GetLatestCurrencyRatesAsync(request);
+
+        // Assert
+        Assert.Equal(cachedResult, result);
+        _providerMock.Verify(p => p.GetLatestCurrencyRatesAsync(It.IsAny<LatestRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetHistoricalCurrencyRatesAsync_WhenCacheExists_ReturnsCachedResult()
+    {
+        // Arrange
+        var request = new HistoricalRequest(DateTime.UtcNow.AddDays(-2), "BRL") { EndDate = DateTime.UtcNow };
+        var records = new List<HistoricalResult>
+        {
+            new(
+                Date: DateTime.UtcNow.AddDays(-2),
+                Values: new Dictionary<string, double> { { "USD", 5.25 } }
+            )
+        };
+        var cachedResult = new PagedResult<HistoricalResult>(records, records.Count);
+
+        _cacheServiceMock.Setup(c => c.TryGetAsync<PagedResult<HistoricalResult>>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cachedResult);
+
+        // Act
+        var result = await _service.GetHistoricalCurrencyRatesAsync(request);
+
+        // Assert
+        Assert.Equal(cachedResult, result);
+        _providerMock.Verify(p => p.GetHistoricalCurrencyRatesAsync(It.IsAny<HistoricalRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

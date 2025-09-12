@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Infrastructure.Currency.DependencyInjection;
 using Infrastructure.Currency.Providers;
 using Infrastructure.Currency.Services;
+using Infrastructure.Redis;
 using Infrastructure.Security.Configurations;
 using Infrastructure.Security.Providers;
 using Infrastructure.Security.Services;
@@ -19,6 +20,12 @@ public static class DependencyInjection
 {
     public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        #region Cache Implementation
+
+        services.AddSingleton<ICacheService, RedisCacheService>();
+
+        #endregion
+
         #region Authentication and Authorization
 
         services.AddSingleton<ITokenProvider, TokenProvider>();

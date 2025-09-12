@@ -36,6 +36,12 @@ builder.Services.AddHttpCommunication
     configuration.GetValue<string>("CurrencyProviderConfiguration:Url")!
 );
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("RedisServer");
+    options.InstanceName = "CurrencyConverterApi";
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();

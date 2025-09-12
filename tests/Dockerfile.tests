@@ -1,0 +1,16 @@
+# Dockerfile.tests
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS testrunner
+
+WORKDIR /src
+
+# Copy solution and projects
+COPY ./Currency.Converter.Api.sln ./
+COPY ./src ./src
+COPY ./tests ./tests
+COPY ./.config ./.config
+
+RUN dotnet tool restore
+
+CMD dotnet test ./Currency.Converter.Api.sln --collect:"XPlat Code Coverage" && \
+    dotnet reportgenerator -reports:"tests/**/TestResults/**/coverage.cobertura.xml" \
+    -targetdir:"/CodeCoverage" -reporttypes:Html

@@ -4,3 +4,16 @@ services:
     build:
       context: .
       dockerfile: src/WebApi/Dockerfile
+    networks:
+      - currency-converter-network
+
+  redis:
+    image: redis:8.2.1-alpine3.22
+    ports:
+      - "7389:6379"
+    networks:
+      - currency-converter-network
+
+networks:
+  currency-converter-network:
+    driver: bridge

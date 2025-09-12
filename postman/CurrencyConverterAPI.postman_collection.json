@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "34bcc3da-1b88-47cd-a390-b1bca3ba3156",
+		"name": "Currency Converter Api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5076096"
+	},
+	"item": [
+		{
+			"name": "Authentication - Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"get token\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.collectionVariables.set(\"Authorization\", jsonData.accessToken);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "text/plain"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"admin@email.com\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BaseAddress}}/Auth",
+					"host": [
+						"{{BaseAddress}}"
+					],
+					"path": [
+						"Auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Currency Rates - Latest",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Authorization}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "text/plain"
+					}
+				],
+				"url": {
+					"raw": "{{BaseAddress}}/v1/CurrencyRates?base=brl",
+					"host": [
+						"{{BaseAddress}}"
+					],
+					"path": [
+						"v1",
+						"CurrencyRates"
+					],
+					"query": [
+						{
+							"key": "base",
+							"value": "brl"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Currency Convert",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Authorization}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "text/plain"
+					}
+				],
+				"url": {
+					"raw": "{{BaseAddress}}/v1/CurrencyRates/convert?base=usd&target=BRL&amount=1",
+					"host": [
+						"{{BaseAddress}}"
+					],
+					"path": [
+						"v1",
+						"CurrencyRates",
+						"convert"
+					],
+					"query": [
+						{
+							"key": "base",
+							"value": "usd"
+						},
+						{
+							"key": "target",
+							"value": "BRL"
+						},
+						{
+							"key": "amount",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Currency Rates - Historical",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Authorization}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "text/plain"
+					}
+				],
+				"url": {
+					"raw": "{{BaseAddress}}/v1/CurrencyRates/history?startDate=2025-09-01&base=BRL&symbols=USD&symbols=EUR&endDate=2025-09-10&pageSize=3&page=2",
+					"host": [
+						"{{BaseAddress}}"
+					],
+					"path": [
+						"v1",
+						"CurrencyRates",
+						"history"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "2025-09-01"
+						},
+						{
+							"key": "base",
+							"value": "BRL"
+						},
+						{
+							"key": "symbols",
+							"value": "USD"
+						},
+						{
+							"key": "symbols",
+							"value": "EUR"
+						},
+						{
+							"key": "symbols",
+							"value": "TRY",
+							"description": "Blocked symbol",
+							"disabled": true
+						},
+						{
+							"key": "endDate",
+							"value": "2025-09-10"
+						},
+						{
+							"key": "pageSize",
+							"value": "3"
+						},
+						{
+							"key": "page",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Authorization",
+			"value": ""
+		},
+		{
+			"key": "BaseAddress",
+			"value": ""
+		}
+	]
+}

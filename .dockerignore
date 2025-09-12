@@ -28,3 +28,8 @@ README.md
 !.git/config
 !.git/packed-refs
 !.git/refs/heads/**
+bin/
+obj/
+docker-compose.dcproj
+docker-compose.override.yml
+docker-compose*.yml

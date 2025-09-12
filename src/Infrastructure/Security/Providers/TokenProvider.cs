@@ -14,7 +14,7 @@ public sealed class TokenProvider(IOptions<TokenConfiguration> options) : IToken
 {
     private readonly TokenConfiguration _tokenConfiguration = options.Value;
 
-    public Task<TokenResult> GenerateTokenAsync(TokenRequest tokenRequest, CancellationToken cancellationToken)
+    public Task<TokenResult> GenerateTokenAsync(TokenRequest tokenRequest, CancellationToken cancellationToken = default)
     {
         var expiresAtUtc = DateTime.UtcNow.AddMinutes(_tokenConfiguration.ExpirationInMinutes);
             
@@ -26,6 +26,12 @@ public sealed class TokenProvider(IOptions<TokenConfiguration> options) : IToken
             new(JwtRegisteredClaimNames.Sub, tokenRequest.Subject),
             new(ClaimTypes.Name, tokenRequest.Name)
         };
+
+        if (tokenRequest.Roles?.Any() ?? false)
+        {
+            foreach (var role in tokenRequest.Roles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var securityToken = new JwtSecurityToken(
             issuer: _tokenConfiguration.Issuer,

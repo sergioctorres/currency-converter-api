@@ -1,4 +1,9 @@
-﻿using Application.Interfaces;
+﻿using Application.Constants;
+using Application.Interfaces;
+using Infrastructure.Currency.DependencyInjection;
+using Infrastructure.Currency.Providers;
+using Infrastructure.Currency.Services;
+using Infrastructure.Redis;
 using Infrastructure.Security.Configurations;
 using Infrastructure.Security.Providers;
 using Infrastructure.Security.Services;
@@ -15,9 +20,14 @@ public static class DependencyInjection
 {
     public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        #region Cache Implementation
+
+        services.AddSingleton<ICacheService, RedisCacheService>();
+
+        #endregion
+
         #region Authentication and Authorization
 
-        services.Configure<TokenConfiguration>(configuration.GetSection("TokenConfiguration"));
         services.AddSingleton<ITokenProvider, TokenProvider>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -41,12 +51,18 @@ public static class DependencyInjection
         });
 
         services.AddAuthorization();
+        services.AddAuthorizationBuilder()
+            .AddPolicy(PolicyConstants.RequireUser, policy => policy.RequireRole(RoleConstants.User))
+            .AddPolicy(PolicyConstants.RequireAdmin, policy => policy.RequireRole(RoleConstants.Admin));
 
         #endregion
 
         #region Services
 
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICurrencyRateProvider, CurrencyService>();
+        services.AddScoped<FrankfurterCurrencyProvider>();
+        services.AddScoped<ICurrencyRateProviderFactory, CurrencyRateProviderFactory>();
 
         #endregion
     }

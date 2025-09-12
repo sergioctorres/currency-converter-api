@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Hosting;
 using Infrastructure.Security.Configurations;
+using Infrastructure.Currency.Configurations;
 
 namespace WebApi.Tests.Builder;
 
@@ -17,6 +18,16 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 Issuer = "WebApi.Tests",
                 Audience = "Clients",
                 ExpirationInMinutes = 45
+            });
+
+            services.AddSingleton(new CurrencyProviderConfiguration
+            {
+                Name = "Frankfurter API",
+                Url = "https://api.frankfurter.app",
+                HealthCheck = new HealthCheckSettings
+                {
+                    Path = "latest"
+                }
             });
         });
     }

@@ -1,0 +1,8 @@
+services:
+  webapi:
+    deploy:
+      replicas: 2
+    expose:
+      - "8080"
+    networks:
+      - currency-converter-network

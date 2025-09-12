@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers.Auth;
 
-[ApiVersion("1.0")]
-[Route("v{version:apiVersion}/[controller]")]
+[Route("[controller]")]
+[ApiVersionNeutral]
 public class AuthController(IAuthService authService, ITokenProvider tokenProvider) : ApiControllerBase
 {
     [HttpPost]
@@ -20,7 +20,7 @@ public class AuthController(IAuthService authService, ITokenProvider tokenProvid
 
         if (loginResult.IsAuthenticated is false) return Unauthorized();
 
-        var tokenRequest = new TokenRequest(loginResult.UserId.ToString(), loginResult.Username);
+        var tokenRequest = new TokenRequest(loginResult.UserId.ToString(), loginResult.Username, loginResult.Roles);
 
         return Ok(await tokenProvider.GenerateTokenAsync(tokenRequest, cancellationToken));
     }

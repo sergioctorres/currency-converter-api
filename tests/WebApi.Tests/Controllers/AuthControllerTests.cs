@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using WebApi.Controllers.Auth;
 
-namespace WebApi.Tests.Controllers.v1;
+namespace WebApi.Tests.Controllers;
 
 public class AuthControllerTests
 {

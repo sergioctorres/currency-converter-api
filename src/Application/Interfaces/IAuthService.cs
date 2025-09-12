@@ -4,5 +4,5 @@ namespace Application.Interfaces;
 
 public interface IAuthService
 {
-    Task<LoginResult> ValidateCredentialsAsync(LoginRequest loginRequest, CancellationToken cancellationToken);
+    Task<LoginResult> ValidateCredentialsAsync(LoginRequest loginRequest, CancellationToken cancellationToken = default);
 }

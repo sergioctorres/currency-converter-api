@@ -2,6 +2,7 @@
 
 public record TokenRequest(
     string Subject,
-    string Name
+    string Name,
+    string[]? Roles
 );
 

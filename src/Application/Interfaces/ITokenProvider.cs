@@ -4,6 +4,6 @@ namespace Application.Interfaces
 {
     public interface ITokenProvider
     {
-        Task<TokenResult> GenerateTokenAsync(TokenRequest tokenRequest, CancellationToken cancellationToken);
+        Task<TokenResult> GenerateTokenAsync(TokenRequest tokenRequest, CancellationToken cancellationToken = default);
     }
 }

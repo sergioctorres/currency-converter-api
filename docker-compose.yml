@@ -6,6 +6,8 @@ services:
       dockerfile: src/WebApi/Dockerfile
     networks:
       - currency-converter-network
+    env_file:
+      - ./env/.env.development
 
   redis:
     image: redis:8.2.1-alpine3.22
